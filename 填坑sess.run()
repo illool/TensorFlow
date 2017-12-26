@@ -1,0 +1,65 @@
+
+sess.run()时需要注意的问题 参数问题
+这里举个简单的例子：
+计算两个矩阵之和：
+
+# -*- coding:utf-8 -*-
+
+import tensorflow as tf
+import numpy as np
+
+aa = tf.random_uniform(shape=[2, 2], dtype=tf.int32, maxval=100)
+bb = tf.constant(np.array([[1, 2], [3, 4]]), dtype=tf.int32)
+cc=aa+bb
+with tf.Session() as sess:
+
+    sess.run(tf.global_variables_initializer())
+    aa1=sess.run([aa])
+    bb1 =sess.run([bb])
+    cc1 =sess.run([cc])
+    print("aa1=",aa1)
+    print("bb1=",bb1)
+    print("cc1=",cc1)
+    #这样肯定出错，打印的矩阵之和是错误的。
+
+因为，运行cc时，又运行了一次aa,把aa的值给更新了，不是之前的值了。所以矩阵之和不正确。
+
+
+结果：
+
+('aa1=', [array([[69, 65],
+       [48, 57]], dtype=int32)])
+('bb1=', [array([[1, 2],
+       [3, 4]], dtype=int32)])
+('cc1=', [array([[ 5, 61],
+       [69, 52]], dtype=int32)])
+
+
+正确的方法：对于需要用到的参数，需要同时运行所用到的所有参数，才能结果正确
+
+# -*- coding:utf-8 -*-
+
+import tensorflow as tf
+import numpy as np
+
+aa = tf.random_uniform(shape=[2, 2], dtype=tf.int32, maxval=100)
+bb = tf.constant(np.array([[1, 2], [3, 4]]), dtype=tf.int32)
+cc=aa+bb
+with tf.Session() as sess:
+
+    sess.run(tf.global_variables_initializer())
+    aa1,bb1,cc1=sess.run([aa,bb,cc])
+
+    print("aa1=",aa1)
+    print("bb1=",bb1)
+    print("cc1=",cc1)
+    #这样才是对的，打印的矩阵才是正确的。
+
+('aa1=', array([[89, 66],
+       [13, 51]], dtype=int32))
+('bb1=', array([[1, 2],
+       [3, 4]], dtype=int32))
+('cc1=', array([[90, 68],
+       [16, 55]], dtype=int32))
+
+

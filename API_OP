@@ -5,7 +5,8 @@ x = tf.placeholder(dtype=tf.float32, shape=None)
 y = tf.placeholder(dtype=tf.float32, shape=None)
 #构造乘法节点op
 #y = tf.matmul(a, b)
-z = x*y
+#z = x*y
+z = tf.mod(x, y, name=None)
 print("设置种子的两种方式和区别")
 tf.set_random_seed(1234)
 #a = tf.random_uniform([1])
@@ -94,6 +95,90 @@ with tf.Session() as sess:
     print(sess.run(test_data))
     print(sess.run(shuff_data2))
 
+    tf_string_to_number = tf.string_to_number("100.01", out_type=None, name="tf_string_to_number")
+    print("字符串转为数字")
+    print(sess.run(tf_string_to_number))
     
+    tf_to_double = tf.to_double(99.0, name="tf_to_double")
+    print("转为double")
+    print(sess.run(tf_to_double))
+    
+    #tensor a is [1.8, 2.2], dtype=tf.float
+    tensor = [1.8, 2.2]
+    tf_cast = tf.cast(x = tensor, dtype = tf.int32,name = "tf.cast") # dtype=tf.int32
+    print("将x或者x.values转换为dtype")
+    print(tensor)
+    print(sess.run(tf_cast))
+    
+    tensor = [[[1, 1, 1], [2, 2, 2]], [[3, 3, 3], [4, 4, 4]]]
+    tf_shape = tf.shape(input = tensor, name="tf.shape")
+    print("返回数据的shape")
+    print(tensor)
+    print(sess.run(tf_shape))
+    
+    tf_size = tf.size(tensor, name="tf.size")
+    print("返回数据的元素数量")
+    print(tensor)
+    print(sess.run(tf_size))
+    
+    tf_rank = tf.rank(tensor, name="tf.rank")
+    print("返回tensor的矩阵的秩")
+    print(tensor)
+    print(sess.run(tf_rank))
+    
+    tensor = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    print("改变tensor的形状")
+    print(tensor)
+    print(sess.run(tf.shape(tensor)))
+    tf_reshape = tf.reshape(tensor, [3, 3])
+    print(sess.run(tf.shape(tf_reshape)))
+    
+    tensor = [
+        [[1, 1, 1], [2, 2, 2]], 
+        [[3, 3, 3], [4, 4, 4]]
+        ]
+    tf_expand_dims1 = tf.expand_dims(tensor, dim = 1, name="tf.expand_dims")
+    tf_expand_dims0 = tf.expand_dims(tensor, dim = 0, name="tf.expand_dims")
+    tf_expand_dims_1 = tf.expand_dims(tensor, dim = -1, name="tf.expand_dims")
+    print("在dim的位置插入维度1进入一个tensor中")
+    print(sess.run(tf.shape(tensor)))
+    print(sess.run(tf.shape(tf_expand_dims1)))
+    print(sess.run(tf_expand_dims1))
+    print(sess.run(tf.shape(tf_expand_dims0)))
+    print(sess.run(tf_expand_dims0))
+    print(sess.run(tf.shape(tf_expand_dims_1)))
+    print(sess.run(tf_expand_dims_1))
+    
+    tensor = [[[1, 1, 1], [2, 2, 2]],
+              [[3, 3, 3], [4, 4, 4]],
+              [[5, 5, 5], [6, 6, 6]]]
+    tf_slice0 = tf.slice(tensor, begin=[1, 0, 0], size=[1, 1, 3],name = "tf.slice")
+    tf_slice1 = tf.slice(tensor, begin=[1, 0, 0], size=[1, 2, 3],name = "tf.slice")
+    tf_slice2 = tf.slice(tensor, begin=[1, 0, 0], size=[2, 1, 3],name = "tf.slice")
+    print("对tensor进行切片操作")
+    print("tf_slice0")
+    print(sess.run(tf_slice0))
+    print("tf_slice1")
+    print(sess.run(tf_slice1))
+    print("tf_slice2")
+    print(sess.run(tf_slice2))
+    
+    '''tensor = [[1, 2, 3, 4, 5, 6, 7, 8, 9],
+             [1, 2, 3, 4, 5, 6, 7, 8, 9]]
+    split0, split1, split2 = tf.split(0,3,tensor, name="tf.split")
+    print("split0")
+    print(sess.run(split0))
+    print("split1")
+    print(sess.run(split1))
+    print("split2")
+    print(sess.run(split2))'''
+    
+    t1 = [[1, 2, 3], [4, 5, 6]]
+    t2 = [[7, 8, 9], [10, 11, 12]]
+    tf_concat0 = tf.concat(0, [t1, t2],name="tf.concat")
+    tf_concat1 = tf.concat(1, [t1, t2],name="tf.concat")
+    print("沿着某一维度连结tensor")
+    print(sess.run(tf_concat0))
+    print(sess.run(tf_concat1))
     #执行会话，输入数据，计算节点，打印结果
     #任务完成，关闭会话

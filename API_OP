@@ -1,0 +1,99 @@
+import tensorflow as tf
+import numpy as np 
+#定位符号变量，占位符
+x = tf.placeholder(dtype=tf.float32, shape=None)
+y = tf.placeholder(dtype=tf.float32, shape=None)
+#构造乘法节点op
+#y = tf.matmul(a, b)
+z = x*y
+print("设置种子的两种方式和区别")
+tf.set_random_seed(1234)
+#a = tf.random_uniform([1])
+b = tf.random_normal([1])
+a = tf.random_uniform([1], seed=1)
+
+
+print("Session 1")
+with tf.Session() as sess1:
+    print(sess1.run(a))  # generates 'A1'
+    print(sess1.run(a))  # generates 'A2'
+    print(sess1.run(b))  # generates 'B1'
+    print(sess1.run(b))  # generates 'B2'
+
+print("Session 2")
+with tf.Session() as sess2:
+    print(sess2.run(a))  # generates 'A3'
+    print(sess2.run(a))  # generates 'A4'
+    print(sess2.run(b))  # generates 'B3'
+    print(sess2.run(b))  # generates 'B4'
+
+with tf.Session() as sess:
+    value = sess.run(z, feed_dict={x: 3, y: 3})
+    print(value)
+    data = tf.zeros(shape = [2, 3], dtype = tf.int32, name = "tf.zeros")
+    print(sess.run(data))
+    
+    tf_zeros_like_1 = tf.zeros_like(data)
+    tf_zeros_like_2 = tf.zeros_like(data, tf.float32,name = "tf.zeros_like")
+    print("这个函数返回一个全是零的张量，数据维度是和data一样，数据类型是默认是和data一样，但是我们也可以自己指定。")
+    print(sess.run(tf_zeros_like_1))
+    print(sess.run(tf_zeros_like_2))
+    
+    tf_ones = tf.ones(shape = [2, 3], dtype = tf.int32, name = "tf_ones")
+    print("这个函数返回一个全是1的张量，数据维度是shape，数据类型是dtype")
+    print(sess.run(data))
+    
+    tf_ones_like_1 = tf.ones_like(data,name = "tf.ones_like")
+    tf_ones_like_2 = tf.ones_like(data, tf.float32,name = "tf.ones_like")
+    print("这个函数返回一个全是'1'的张量，数据维度是和data一样，数据类型是默认是和data一样，但是我们也可以自己指定。")
+    print(sess.run(tf_ones_like_1))
+    print(sess.run(tf_ones_like_2))
+    
+    tf_fill = tf.fill(dims = [2,3],value = 9.,name = "tf.fill")
+    print("这个函数返回一个Tensor，数据维度是dims，填充的数据都是value")
+    print(sess.run(tf_fill))
+    
+    tf_constant1 = tf.constant([1, 2, 3],name = "tf.constant")
+    print("这个函数返回一个常量Tensor,可以指定值和维度")
+    print(sess.run(tf_constant1))
+    tf_constant2 = tf.constant(-1.0, shape = [2, 3],name = "tf.constant")
+    print(sess.run(tf_constant2))
+    tf_constant3 = tf.constant(2.0, dtype = tf.float32, shape = [3, 2],name = "tf.constant")
+    print(sess.run(tf_constant3))
+    
+    linspace = tf.linspace(start=10.0, stop=15.0, num=10,name = "tf.linspace")
+    print("这个函数返回一个序列数组，数组的第一个元素是start，如果num>1，那么序列的最后一个元素就是 stop - start / num - 1。也就是说，最后一个元素肯定是stop")
+    print("start到stop之间取num个数字,num个数中包括start和stop")
+    print(sess.run(linspace))
+    
+    tf_range = tf.range(start=3, limit=15, delta=3,name="tf.range")
+    print("这个函数返回一个序列数组，数组的第一个元素是start，之后的每一个元素都在前一个元素的基础上，加上delta，直到limit，但是不包括limit")
+    print(sess.run(tf_range))
+
+    tf_random_normal =tf.random_normal(shape=[2,3], mean = 10.0, stddev = 1.0, dtype = tf.float32, seed = None, name = "tf.random_normal")
+    print("这个函数返回一个随机数序列，数组里面的值按照正态分布,mean为均值，stddev为方差")
+    print(sess.run(tf_random_normal))
+    
+    tf_truncated_normal =tf.truncated_normal(shape=[2,3], mean = 10.0, stddev = 1.0, dtype = tf.float32, seed = None, name = "tf.truncated_normal")
+    print("这个函数返回一个随机数序列，数组里面的值按照正态分布，但和random_normal函数不同的是，该值返回的是一个截断的正态分布类型。也就是说，产生出来的值范围都是在 [mean - 2 * standard_deviations, mean + 2 * standard_deviations]内,mean为均值，stddev为方差")
+    print(sess.run(tf_truncated_normal))
+    
+    tf_random_uniform = tf.random_uniform(shape=[2,3], minval = 10.0, maxval = 20.0, dtype = tf.float32, seed = None, name = None)
+    print("这个函数返回一个随机数序列，数组里面的值按照均匀分布，数据范围是 [minval, maxval)")
+    print(sess.run(tf_random_uniform))
+    
+    test_data = tf.constant([[1, 2], [3, 4], [5, 6]])
+    shuff_data1 = tf.random_shuffle(test_data,name = "tf_random_shuffle")
+    print("这个函数返回一个随机数序列，将value中的数据打乱输出")
+    print(sess.run(test_data))
+    print(sess.run(shuff_data1))
+
+    test_data = tf.constant([1, 2, 3, 4, 5, 6])
+    shuff_data2 = tf.random_shuffle(test_data,name = "tf_random_shuffle")
+    print("这个函数返回一个随机数序列，将value中的数据打乱输出")
+    print(sess.run(test_data))
+    print(sess.run(shuff_data2))
+
+    
+    #执行会话，输入数据，计算节点，打印结果
+    #任务完成，关闭会话

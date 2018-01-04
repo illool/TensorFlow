@@ -173,12 +173,87 @@ with tf.Session() as sess:
     print("split2")
     print(sess.run(split2))'''
     
-    t1 = [[1, 2, 3], [4, 5, 6]]
+    '''t1 = [[1, 2, 3], [4, 5, 6]]
     t2 = [[7, 8, 9], [10, 11, 12]]
     tf_concat0 = tf.concat(0, [t1, t2],name="tf.concat")
     tf_concat1 = tf.concat(1, [t1, t2],name="tf.concat")
     print("沿着某一维度连结tensor")
     print(sess.run(tf_concat0))
-    print(sess.run(tf_concat1))
+    print(sess.run(tf_concat1))'''
+    
+    aa=tf.constant([1,2,3],dtype=tf.float32)
+    bb=tf.constant([[1,1],[2,2],[3,3]],dtype=tf.float32)
+    print("output = sum(t ** 2) / 2")
+    print("对权重参数进行正则化")
+    print("a:")
+    print(sess.run(tf.nn.l2_loss(aa)))
+    print("b:")
+    print(sess.run(tf.nn.l2_loss(bb)))
+    
+    '''
+                注意：如果labels的每一行是one-hot表示，也就是只有一个地方为1，其他地方为0，可以使用tf.sparse_softmax_cross_entropy_with_logits()
+    '''
+    #每一行labels[i]必须为一个概率分布,和为1
+    #[batch_size, num_classes]
+    labels = [[0.2,0.3,0.5],
+          [0.1,0.6,0.3]]
+    labels1 = [0,2]
+    #未缩放的对数概率
+    logits = [[2,0.5,1],
+          [0.1,1,3]]
+    logits_scaled = tf.nn.softmax(logits)
+    #长度为batch_size的一维Tensor
+    result1 = tf.nn.softmax_cross_entropy_with_logits_v2(labels=labels, logits=logits)
+    result2 = -tf.reduce_sum(labels*tf.log(logits_scaled),1)
+    result3 = tf.nn.softmax_cross_entropy_with_logits_v2(labels=labels, logits=logits_scaled)
+    result4 = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels1, logits=logits)
+    print("交叉熵")
+    print(sess.run(result1))
+    print(sess.run(result2))
+    print(sess.run(result3))
+    print(sess.run(result4))
+    
+    #判断target 是否在top k 的预测之中
+    tensor = [1, 2, 3, 4, 5, 6, 7, 8, 9,10]
+    A = [[0.8,0.6,1.0], [0.1,0.6,0.4]]  
+    B = [2, 1]  
+    #init=tf.global_variables_initializer()
+    #sess.run(init)
+    tf_nn_top_k = tf.nn.top_k(input = tensor, k=2, sorted=True, name="tf.nn.top_k")
+    tf_nn_in_top_k = tf.nn.in_top_k(predictions=A, targets=B, k=1, name="tf.nn.in_top_k")
+    print("返回前k大的值及其对应的索引")
+    print(sess.run(tf_nn_top_k))
+    print("返回前k大的值及其对应的索引,targets中索引是不是对应A中的最大值的索引，是就是True")
+    print(sess.run(tf_nn_in_top_k))
+    
+    W = tf.constant([[-2.,12.,6.],[3.,2.,8.]])
+    mean,var = tf.nn.moments(W, axes = [0])
+    print("直接计算均值与方差,按列来计算：")
+    resultMean = sess.run(mean)
+    print(resultMean)
+    resultVar = sess.run(var)
+    print(resultVar)
+    
+    batch_size = 5
+    ones = tf.ones([batch_size,20])
+    logits = tf.layers.dense(inputs=ones,units=10,name="tf.layers.dense")
+    print("tf.layers.dense实例,inputs: 输入数据，2维tensor,units: 该层的神经单元结点数.")
+    print(ones.get_shape())
+    print(logits.get_shape())
+    
+    
+    batch_size = 5
+    ones = tf.ones([batch_size,8,20])
+    logits = tf.layers.dense(inputs=ones,units=10)
+    print("tf.layers.dense实例,inputs: 输入数据，2维tensor,units: 该层的神经单元结点数.")
+    print(ones.get_shape())
+    print(logits.get_shape())
+    
+    batch_size = 5
+    ones = tf.ones([batch_size,6,8,20])
+    logits = tf.layers.dense(ones,10)
+    print("tf.layers.dense实例,inputs: 输入数据，2维tensor,units: 该层的神经单元结点数.")
+    print(ones.get_shape())
+    print(logits.get_shape())
     #执行会话，输入数据，计算节点，打印结果
     #任务完成，关闭会话

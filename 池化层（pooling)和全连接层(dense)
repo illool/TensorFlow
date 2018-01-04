@@ -1,0 +1,111 @@
+池化层定义在 tensorflow/python/layers/pooling.py.
+
+有最大值池化和均值池化。
+
+1、tf.layers.max_pooling2d
+复制代码
+
+max_pooling2d(
+    inputs,
+    pool_size,
+    strides,
+    padding='valid',
+    data_format='channels_last',
+    name=None
+)
+
+复制代码
+
+    inputs: 进行池化的数据。
+    pool_size: 池化的核大小(pool_height, pool_width)，如[3，3]. 如果长宽相等，也可以直接设置为一个数，如pool_size=3.
+    strides: 池化的滑动步长。可以设置为[1,1]这样的两个整数. 也可以直接设置为一个数，如strides=2
+    padding: 边缘填充，'same' 和'valid‘选其一。默认为valid
+    data_format: 输入数据格式，默认为channels_last ，即 (batch, height, width, channels),也可以设置为channels_first 对应 (batch, channels, height, width).
+    name: 层的名字。
+
+例：
+
+pool1=tf.layers.max_pooling2d(inputs=x, pool_size=[2, 2], strides=2)
+
+一般是放在卷积层之后，如：
+复制代码
+
+conv=tf.layers.conv2d(
+      inputs=x,
+      filters=32,
+      kernel_size=[5, 5],
+      padding="same",
+      activation=tf.nn.relu)
+pool=tf.layers.max_pooling2d(inputs=conv, pool_size=[2, 2], strides=2)
+
+复制代码
+
+2.tf.layers.average_pooling2d
+复制代码
+
+average_pooling2d(
+    inputs,
+    pool_size,
+    strides,
+    padding='valid',
+    data_format='channels_last',
+    name=None
+)
+
+复制代码
+
+参数和前面的最大值池化一样。
+
+ 
+
+全连接dense层定义在 tensorflow/python/layers/core.py.
+
+3、tf.layers.dense
+复制代码
+
+dense(
+    inputs,
+    units,
+    activation=None,
+    use_bias=True,
+    kernel_initializer=None,
+    bias_initializer=tf.zeros_initializer(),
+    kernel_regularizer=None,
+    bias_regularizer=None,
+    activity_regularizer=None,
+    trainable=True,
+    name=None,
+    reuse=None
+)
+
+复制代码
+
+    inputs: 输入数据，2维tensor.
+    units: 该层的神经单元结点数。
+    activation: 激活函数.
+    use_bias: Boolean型，是否使用偏置项.
+    kernel_initializer: 卷积核的初始化器.
+    bias_initializer: 偏置项的初始化器，默认初始化为0.
+    kernel_regularizer: 卷积核化的正则化，可选.
+    bias_regularizer: 偏置项的正则化，可选.
+    activity_regularizer: 输出的正则化函数.
+    trainable: Boolean型，表明该层的参数是否参与训练。如果为真则变量加入到图集合中 GraphKeys.TRAINABLE_VARIABLES (see tf.Variable).
+    name: 层的名字.
+    reuse: Boolean型, 是否重复使用参数.
+
+全连接层执行操作 outputs = activation(inputs.kernel + bias)
+
+如果执行结果不想进行激活操作，则设置activation=None。
+
+例：
+
+#全连接层
+dense1 = tf.layers.dense(inputs=pool3, units=1024, activation=tf.nn.relu)
+dense2= tf.layers.dense(inputs=dense1, units=512, activation=tf.nn.relu)
+logits= tf.layers.dense(inputs=dense2, units=10, activation=None)
+
+也可以对全连接层的参数进行正则化约束：
+
+dense1 = tf.layers.dense(inputs=pool3, units=1024, activation=tf.nn.relu，kernel_regularizer=tf.contrib.layers.l2_regularizer(0.003))
+
+ 

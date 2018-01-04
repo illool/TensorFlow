@@ -1,0 +1,26 @@
+import readData
+import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
+import random
+#[images, labels] = readData.load_mnist("F:\\PythonPro\\testTensorFlow\\src\\MNIST_data", kind='train')
+train = readData.load_mnist("F:\\PythonPro\\testTensorFlow\\src\\MNIST_data", kind='train')
+test = readData.load_mnist("F:\\PythonPro\\testTensorFlow\\src\\MNIST_data", kind='t10k')
+print(test[0].shape)
+print(test[1].shape)
+fig, ax = plt.subplots(
+    nrows=4,
+    ncols=25,
+    sharex=False,
+    sharey=False, )
+
+ax = ax.flatten()
+for i in range(100):
+    img = test[0][i].reshape(28, 28)
+    lab = test[1][i]
+    ax[i].imshow(img, cmap='Greys', interpolation='nearest')
+    ax[i].text(2, 6, lab, fontsize=15);
+    ax[i].set_xticks([])
+    ax[i].set_yticks([])
+plt.tight_layout()
+plt.show()

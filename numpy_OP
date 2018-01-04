@@ -1,0 +1,69 @@
+#coding:utf8
+import tensorflow as tf
+import numpy as np
+sess = tf.InteractiveSession()
+
+print("u", "*" * 20)
+arru = np.array([[123]])
+print(np.shape(arru))
+print( arru)
+arrut = tf.convert_to_tensor(arru)
+print("squeeze=>")
+print( tf.squeeze(arrut).eval())
+
+
+print( "x", "*" * 20)
+arrx = np.array([[1,2, 3], [2, 3, 4], [4, 5,6], [6, 7,8]])
+print( np.shape(arrx))
+print( arrx)
+arrxt = tf.convert_to_tensor(arrx)
+print( "squeeze=>")
+print( tf.squeeze(arrxt).eval())
+
+print( "y", "*" * 20)
+arry = np.array([[10], [20]])
+arryt = tf.convert_to_tensor(arry)
+print( np.shape(arry))
+print( arry)
+print( "squeeze=>")
+print( tf.squeeze(arryt).eval())
+
+
+print( "z", "*" * 20)
+arrz = np.array([[19,20]])
+arrzt = tf.convert_to_tensor(arrz)
+print( np.shape(arrz))
+print( arrzt.eval())
+print( "squeeze=>")
+print( tf.squeeze(arrzt).eval())
+
+print( "e", "*" * 20)
+arre = np.array([[1,2, 3], [2, 3, 4]])
+print( np.shape(arre))
+print( arre)
+arret = tf.convert_to_tensor(arre)
+print( "squeeze=>")
+print( tf.squeeze(arret).eval())
+
+print( "f", "*" * 20)
+arrf = np.array(range(2, 8)).reshape(3, 2, 1)
+print( np.shape(arrf))
+print( arrf)
+arrft = tf.convert_to_tensor(arrf)
+print( "squeeze=>")
+print( tf.squeeze(arrft).eval())
+
+print( "h", "*" * 20)
+arrh = np.array(range(2, 8)).reshape(3, 1, 2)
+print( np.shape(arrh))
+print( arrh)
+arrht = tf.convert_to_tensor(arrh)
+print( "squeeze=>")
+print( tf.squeeze(arrht).eval())
+
+test = np.array([[1, 2, 3], [2, 3, 4], [5, 4, 3], [8, 7, 2]])
+print( "argmax=>")
+print(np.argmax(test, 0))   #output:array([3, 3, 1] col 
+print(np.argmax(test, 1))   #output:array([2, 2, 0, 0] row
+
+sess.close()

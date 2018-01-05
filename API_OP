@@ -255,5 +255,17 @@ with tf.Session() as sess:
     print("tf.layers.dense实例,inputs: 输入数据，2维tensor,units: 该层的神经单元结点数.")
     print(ones.get_shape())
     print(logits.get_shape())
+    
+    v1 = tf.get_variable(name='v1', shape=[1], initializer=tf.constant_initializer(10))  
+    tf.add_to_collection('loss', v1)  
+    v2 = tf.get_variable(name='v2', shape=[1], initializer=tf.constant_initializer(2))  
+    tf.add_to_collection('loss', v2)  
+  
+    sess.run(tf.global_variables_initializer())  
+    print("tf.add_to_collection：把变量放入一个集合，把很多变量变成一个列表 \n"+
+    "tf.get_collection：从一个结合中取出全部变量，是一个列表\n"+
+    "tf.add_n：把一个列表的东西都依次加起来\n")
+    print(tf.get_collection('loss'))
+    print(sess.run(tf.add_n(tf.get_collection('loss'))))  
     #执行会话，输入数据，计算节点，打印结果
     #任务完成，关闭会话

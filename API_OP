@@ -267,5 +267,33 @@ with tf.Session() as sess:
     "tf.add_n：把一个列表的东西都依次加起来\n")
     print(tf.get_collection('loss'))
     print(sess.run(tf.add_n(tf.get_collection('loss'))))  
+    
+    weights = tf.constant([[1., -2.], [-3., 4.]])
+    print("用weights来计算ln_regularizer")
+    print(sess.run(tf.contrib.layers.l1_regularizer(.5)(weights)))
+            # (1+2+3+4)*.5 ⇒ 5
+    print(sess.run(tf.contrib.layers.l2_regularizer(.5)(weights)))
+            # (1+4+9+16)*.5*.5 ⇒ 7.5
+            
+    tensor = [[[1, 1, 1], [2, 2, 2]],
+              [[3, 3, 3], [4, 4, 4]],
+              [[5, 5, 5], [6, 6, 6]]]
+    allmean = tf.reduce_mean(tensor)
+    colmean = tf.reduce_mean(tensor, 0)
+    rowmean = tf.reduce_mean(tensor, 1)
+    thrmean = tf.reduce_mean(tensor, 2)
+    allmax = tf.reduce_max(tensor)
+    colmax = tf.reduce_max(tensor, 0)
+    rowmax = tf.reduce_max(tensor, 1)
+    thrmax = tf.reduce_max(tensor, 2)
+    print("reduce_mean and reduce_max")
+    print(sess.run(allmean))
+    print(sess.run(colmean))
+    print(sess.run(rowmean))
+    print(sess.run(thrmean))
+    print(sess.run(allmax))
+    print(sess.run(colmax))
+    print(sess.run(rowmax))
+    print(sess.run(thrmax))
     #执行会话，输入数据，计算节点，打印结果
     #任务完成，关闭会话

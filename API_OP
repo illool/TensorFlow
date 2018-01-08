@@ -302,7 +302,14 @@ with tf.Session() as sess:
     print("使用tf.cast来做数据类型的转换")
     print(sess.run(a))
     print(sess.run(b))
-#[ True False False  True  True]
+    
+    input1 = tf.constant([1.0, 2.0, 3.0])  
+    input2 = tf.Variable(tf.random_uniform([3]))  
+    output = tf.add_n([input1, input2])  
+    sess.run(tf.global_variables_initializer()) 
+    print("add_n实现列表里面的数据逐项相加") 
+    print(sess.run(input1 + input2))
+    print(sess.run(output))
     
     #执行会话，输入数据，计算节点，打印结果
     #任务完成，关闭会话

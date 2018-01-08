@@ -295,5 +295,14 @@ with tf.Session() as sess:
     print(sess.run(colmax))
     print(sess.run(rowmax))
     print(sess.run(thrmax))
+    
+    a = tf.Variable([1,0,0,1,1],name="tf.cast")
+    b = tf.cast(a,dtype=tf.bool,name="tf.cast")
+    sess.run(tf.global_variables_initializer())
+    print("使用tf.cast来做数据类型的转换")
+    print(sess.run(a))
+    print(sess.run(b))
+#[ True False False  True  True]
+    
     #执行会话，输入数据，计算节点，打印结果
     #任务完成，关闭会话

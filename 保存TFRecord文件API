@@ -1,0 +1,74 @@
+保存TFRecord文件
+常用的类
+Ⅰ tf.python_io.TFRecordWriter
+
+把记录写入到TFRecords文件的类.
+函数
+
+__init__(path,options=None)
+
+    作用:创建一个TFRecordWriter对象,这个对象就负责写记录到指定的文件中去了.
+    参数:
+    path: TFRecords 文件路径
+    options: (可选) TFRecordOptions对象
+
+close()
+
+    作用:关闭对象.
+
+write(record)
+
+    作用:把字符串形式的记录写到文件中去.
+    参数:
+    record: 字符串,待写入的记录
+
+Ⅱ.tf.train.Example
+
+这个类是非常重要的,TFRecord文件中的数据都是通过tf.train.Example Protocol Buffer的格式存储的.
+在这里,不会非常详细的讲这个类,但是会给出常见的使用方法和一些重要函数的解释.其他的细节可以参考文档.
+class tf.train.Example
+属性:
+
+    features Magic attribute generated for “features” proto field.
+
+函数:
+
+__init__(**kwargs)
+
+    这个函数是初始化函数,会生成一个Example对象,一般我们使用的时候,是传入一个tf.train.Features对象进去.
+
+SerializeToString()
+
+    作用:把example序列化为一个字符串,因为在写入到TFRcorde的时候,write方法的参数是字符串的.
+
+Ⅲ.tf.train.Features
+
+class tf.train.Features
+属性:
+
+    feature
+
+函数:
+
+__init__(**kwargs)
+作用:初始化Features对象,一般我们是传入一个字典,字典的键是一个字符串,表示名字,字典的值是一个tf.train.Feature对象.
+Ⅳ.tf.train.Feature
+
+class tf.train.Feature
+属性:
+
+    bytes_list
+    float_list
+    int64_list
+
+函数:
+__init__(**kwargs)
+
+    作用:构造一个Feature对象,一般使用的时候,传入 tf.train.Int64List, tf.train.BytesList, tf.train.FloatList对象.
+
+Ⅴ.tf.train.Int64List, tf.train.BytesList, tf.train.FloatList
+
+使用的时候,一般传入一个具体的值,比如学习任务中的标签就可以传进value=tf.train.Int64List,而图片就可以先转为字符串的格式之后,传入value=tf.train.BytesList中.
+说明:
+
+    以上的函数的API都可以对照着例子的代码来熟悉,看在例子中是怎么使用的这些对象.

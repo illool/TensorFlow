@@ -1,0 +1,121 @@
+tf.get_variable 与 tf.variable 的用法不同。前者在创建变量时会查名字，如果给的名字在之前已经被别的变量占用，则会报错，不会创建相应变量。而后者并不进行检查，如果有重复，则自动的修改名字，加上数字来进行区别。所以从这来看要想共享变量并不能通过使用相同的名字来调用多次 tf.get_variable 和 tf.variable 做到。
+
+比如下面这样的代码：
+
+[python] view plain copy
+
+    <span style="font-size:14px;">def my_image_filter(input_images):  
+        conv1_weights = tf.Variable(tf.random_normal([5, 5, 32, 32]),  
+            name="conv1_weights")  
+        conv1_biases = tf.Variable(tf.zeros([32]), name="conv1_biases")  
+        conv1 = tf.nn.conv2d(input_images, conv1_weights,  
+            strides=[1, 1, 1, 1], padding='SAME')  
+        relu1 = tf.nn.relu(conv1 + conv1_biases)  
+      
+        conv2_weights = tf.Variable(tf.random_normal([5, 5, 32, 32]),  
+            name="conv2_weights")  
+        conv2_biases = tf.Variable(tf.zeros([32]), name="conv2_biases")  
+        conv2 = tf.nn.conv2d(relu1, conv2_weights,  
+            strides=[1, 1, 1, 1], padding='SAME')  
+        return tf.nn.relu(conv2 + conv2_biases)</span>  
+
+在这个函数中，我们有 'conv1_weights'，'conv1_biases'，'conv2_weights'，'conv2_biases' 4个变量。如果我们重用这个函数，则会产生多组变量，并不会使用相同的变量，如下面调用：
+
+[python] view plain copy
+
+    <span style="font-size:14px;"># First call creates one set of variables.  
+    result1 = my_image_filter(image1)  
+    # Another set is created in the second call.  
+    result2 = my_image_filter(image2)</span>  
+
+上面实际上用两个不同的滤波器对 image1 和 image2 进行滤波，虽然用的是相同的函数。所以呢，这就产生了问题，下面介绍如何进行变量共享。
+
+我们使用 with tf.variable_scope 来进行共享。比如有下面的代码：
+
+[python] view plain copy
+
+    <span style="font-size:14px;">def conv_relu(input, kernel_shape, bias_shape):  
+        # Create variable named "weights".  
+        weights = tf.get_variable("weights", kernel_shape,  
+            initializer=tf.random_normal_initializer())  
+        # Create variable named "biases".  
+        biases = tf.get_variable("biases", bias_shape,  
+            initializer=tf.constant_intializer(0.0))  
+        conv = tf.nn.conv2d(input, weights,  
+            strides=[1, 1, 1, 1], padding='SAME')  
+        return tf.nn.relu(conv + biases)  
+    def my_image_filter(input_images):  
+        with tf.variable_scope("conv1"):  
+            # Variables created here will be named "conv1/weights", "conv1/biases".  
+            relu1 = conv_relu(input_images, [5, 5, 32, 32], [32])  
+        with tf.variable_scope("conv2"):  
+            # Variables created here will be named "conv2/weights", "conv2/biases".  
+            return conv_relu(relu1, [5, 5, 32, 32], [32])</span>  
+
+若要调用两次 my_image_filter 并且使用相同的变量，则如下所示：
+
+[python] view plain copy
+
+    <span style="font-size:14px;">with tf.variable_scope("image_filters") as scope:  
+        result1 = my_image_filter(image1)  
+        scope.reuse_variables()  
+        result2 = my_image_filter(image2)</span>  
+
+利用 reuse_variables() 来使变量重用。值得注意的是下面的代码解释了 tf.get_variable 工作原理：
+
+[python] view plain copy
+
+    <span style="font-size:14px;">with tf.variable_scope("foo"):  
+        v = tf.get_variable("v", [1])  
+    with tf.variable_scope("foo", reuse=True):  
+        v1 = tf.get_variable("v", [1])  
+    assert v1 == v</span>  
+
+如果 reuse 开启，当检查到有相同的名字时，直接返回那个有相同名字的变量而不是重新定义一个再复制值。
+
+
+下面是使用时需要注意的地方
+
+1. 在 variable_scope 里面的 variable_scope 会继承上面的 reuse 值，即上面一层开启了 reuse ，则下面的也跟着开启。但是不能人为的设置 reuse 为 false ，只有退出 variable_scope 才能让 reuse 变为 false：
+
+[python] view plain copy
+
+    <span style="font-size:14px;">with tf.variable_scope("root"):  
+        # At start, the scope is not reusing.  
+        assert tf.get_variable_scope().reuse == False  
+        with tf.variable_scope("foo"):  
+            # Opened a sub-scope, still not reusing.  
+            assert tf.get_variable_scope().reuse == False  
+        with tf.variable_scope("foo", reuse=True):  
+            # Explicitly opened a reusing scope.  
+            assert tf.get_variable_scope().reuse == True  
+            with tf.variable_scope("bar"):  
+                # Now sub-scope inherits the reuse flag.  
+                assert tf.get_variable_scope().reuse == True  
+        # Exited the reusing scope, back to a non-reusing one.  
+        assert tf.get_variable_scope().reuse == False</span>  
+
+
+2. 当在某一 variable_scope 内使用别的 scope 的名字时，此时不再受这里的等级关系束缚，直接与使用的 scope 的名字一样：
+
+[python] view plain copy
+
+    <span style="font-size:14px;">with tf.variable_scope("foo") as foo_scope:  
+        assert foo_scope.name == "foo"  
+    with tf.variable_scope("bar")  
+        with tf.variable_scope("baz") as other_scope:  
+            assert other_scope.name == "bar/baz"  
+            with tf.variable_scope(foo_scope) as foo_scope2:  
+                assert foo_scope2.name == "foo"  # Not changed.</span>  
+
+
+3. name_scope 与 variable_scope 稍有不同。name_scope 只会影响 ops 的名字，而并不会影响 variables 的名字。
+
+[python] view plain copy
+
+    <span style="font-size:14px;">with tf.variable_scope("foo"):  
+        with tf.name_scope("bar"):  
+            v = tf.get_variable("v", [1])  
+            x = 1.0 + v  
+    assert v.name == "foo/v:0"  
+    assert x.op.name == "foo/bar/add"</span>  

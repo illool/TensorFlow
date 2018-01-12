@@ -1,4 +1,5 @@
- Dataset API是TensorFlow 1.3版本中引入的一个新的模块，主要服务于数据读取，构建输入数据的pipeline。
+http://blog.csdn.net/jk981811667/article/details/78911635
+Dataset API是TensorFlow 1.3版本中引入的一个新的模块，主要服务于数据读取，构建输入数据的pipeline。
 
 此前，在TensorFlow中读取数据一般有两种方法：
 

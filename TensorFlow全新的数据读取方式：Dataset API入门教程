@@ -1,0 +1,37 @@
+例子：读入磁盘图片与对应label
+
+讲到这里，我们可以来考虑一个简单，但同时也非常常用的例子：读入磁盘中的图片和图片相应的label，并将其打乱，组成batch_size=32的训练样本。在训练时重复10个epoch。
+
+对应的程序为（从官方示例程序修改而来）：
+
+# 函数的功能时将filename对应的图片文件读进来，并缩放到统一的大小
+def _parse_function(filename, label):
+  image_string = tf.read_file(filename)
+  image_decoded = tf.image.decode_image(image_string)
+  image_resized = tf.image.resize_images(image_decoded, [28, 28])
+  return image_resized, label
+
+# 图片文件的列表
+filenames=tf.constant(["/var/data/image1.jpg","/var/data/image2.jpg", ...])
+# label[i]就是图片filenames[i]的label
+labels = tf.constant([0, 37, ...])
+
+# 此时dataset中的一个元素是(filename, label)
+dataset = tf.data.Dataset.from_tensor_slices((filenames, labels))
+
+# 此时dataset中的一个元素是(image_resized, label)
+dataset = dataset.map(_parse_function)
+
+# 此时dataset中的一个元素是(image_resized_batch, label_batch)
+dataset = dataset.shuffle(buffersize=1000).batch(32).repeat(10)
+
+在这个过程中，dataset经历三次转变：
+
+运行dataset = tf.data.Dataset.from_tensor_slices((filenames, labels))后，dataset的一个元素是(filename, label)。filename是图片的文件名，label是图片对应的标签。
+
+之后通过map，将filename对应的图片读入，并缩放为28x28的大小。此时dataset中的一个元素是(image_resized, label)
+
+最后，dataset.shuffle(buffersize=1000).batch(32).repeat(10)的功能是：在每个epoch内将图片打乱组成大小为32的batch，并重复10次。
+
+最终，dataset中的一个元素是(image_resized_batch, label_batch)，image_resized_batch的形状为(32, 28, 28, 3)，而label_batch的形状为(32, )，接下来我们就可以用这两个Tensor来建立模型了
+  

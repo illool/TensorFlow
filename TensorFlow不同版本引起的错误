@@ -1,0 +1,105 @@
+ 这几天分别基于tensorflow0.11和1.0版本测试，记录下两个版本不同的API，
+
+参考：http://blog.csdn.NET/edwards_june/article/details/65652385
+
+
+前4个是 V0.11 的API 用在 V1.0 的错误
+
+1. AttributeError: 'module' object has no attribute 'merge_all_summaries'
+
+>> tf.merge_all_summaries() 改为：summary_op = tf.summary.merge_all()
+
+2. AttributeError: 'module' object has no attribute 'SummaryWriter'
+
+>> tf.train.SummaryWriter 改为：tf.summary.FileWriter
+
+3. AttributeError: 'module' object has no attribute 'scalar_summary'
+
+>> tf.scalar_summary 改为：tf.summary.scalar
+
+
+4. AttributeError: 'module' object has no attribute 'histogram_summary'
+>> histogram_summary 改为：tf.summary.histogram
+
+下边这个是 V1.0 的API 用在 V0.11 的错误
+File "dis-alexnet_benchmark.py", line 110, in alexnet_v2
+    biases_initializer=tf.zeros_initializer(),
+TypeError: zeros_initializer() takes at least 1 argument (0 given)
+>> 将 biases_initializer=tf.zeros_initializer() 改为：biases_initializer=tf.zeros_initializer
+
+tensorflow1.0中的改善
+
+TensorFlow 1.0 重大功能及改善
+
+
+XLA（实验版）：初始版本的XLA，针对TensorFlow图（graph）的专用编译器，面向CPU和GPU。
+TensorFlow Debugger（tfdbg）：命令行界面和API。
+添加了新的python 3 docker图像。
+使pip包兼容pypi。TensorFlow现在可以通过 [pip install tensorflow] 命令安装。
+更改了几个python API的调用方式，使其更类似 NumPy。
+新的（实验版）Java API。
+Android：全新人物检测+跟踪演示实现——“Scalable Object Detection using DNN”（带有额外的YOLO对象检测器支持）。
+Android：全新基于摄像头的图像风格转换演示，使用了神经网络艺术风格转换技术。
+　　重大 API 变动
+　　为了帮助您升级现有的TensorFlow Python代码以匹配以下API更改，我们准备了一个转换脚本，详见：https://github.com/tensorflow/tensorflow/tree/master/tensorflow/tools/compatibility
+1、TensorFlow / models已经被移动到一个单独的github库。
+2、除法和模运算符（/，//，％）现在匹配Python（flooring）语义。这也适用于 [tf.div] 和 [tf.mod]。要获取基于强制整数截断的行为，可以使用 [tf.truncatediv] 和 　　　　　[tf.truncatemod]。
+3、现在推荐使用 [tf.divide()] 作为除法函数。[tf.div()] 将保留，但它的语义不会回应 Python 3 或 [from future] 机制。
+4、tf.reverse() 现在取轴的索引要反转。例如 [tf.reverse（a，[True，False，True]）] 现在必须写为 [tf.reverse（a，[0，2]）]。 [tf.reverse_v2（）] 将保持到   　　　　TensorFlow 1.0 最终版。
+5、[tf.mul，tf.sub ] 和 [tf.neg] 不再使用，改为 [tf.multiply]，[tf.subtract] 和 [tf.negative]。
+6、[tf.pack] 和 [tf.unpack] 弃用，改为 [tf.stack] 和 [tf.unstack]。
+7、[TensorArray.pack] 和 [TensorArray.unpack] 在弃用过程中，将来计划启用 [TensorArray.stack] 和 [TensorArray.unstack]。
+
+ 
+
+以下Python函数的参数在引用特定域时，全部改为使用 [axis]。目前仍将保持旧的关键字参数的兼容性，但计划在 1.0 最终版完成前删除。
+1、tf.listdiff已重命名为tf.setdiff1d以匹配NumPy命名。
+2、tf.inv已被重命名为tf.reciprocal（组件的倒数），以避免与np.inv的混淆，后者是矩阵求逆。
+3、tf.round现在使用banker的舍入（round to even）语义来匹配NumPy。
+4、tf.split现在以相反的顺序并使用不同的关键字接受参数。我们现在将NumPy order 匹配为tf.split（value，num_or_size_splits，axis）。
+5、tf.sparse_split现在采用相反顺序的参数，并使用不同的关键字。我们现在将NumPy order 匹配为tf.sparse_split（sp_input，num_split，axis）。注意：我们暂时要求 　　tf.sparse_split 需要关键字参数。
+6、tf.concat现在以相反的顺序并使用不同的关键字接受参数。特别地，我们现在将NumPy order匹配为tf.concat（values，axis，name）。
+7、默认情况下，tf.image.decode_jpeg使用更快的DCT方法，牺牲一点保真度来提高速度。通过指定属性dct_method ='INTEGER_ACCURATE'，可以恢复到旧版行为。
+8、tf.complex_abs已从Python界面中删除。 tf.abs支持复杂张量，现在应该使用 tf.abs。
+9、Template.var_scope属性重命名为.variable_scope
+10、SyncReplicasOptimizer已删除，SyncReplicasOptimizerV2重命名为SyncReplicasOptimizer。
+11、tf.zeros_initializer（）和tf.ones_initializer（）现在返回一个必须用initializer参数调用的可调用值，在代码中用tf.zeros_initializer（）替换tf.zeros_initializer。
+12、SparseTensor.shape已重命名为SparseTensor.dense_shape。与SparseTensorValue.shape相同。
+13、分别替换tf.scalar_summary，tf.histogram_summary，tf.audio_summary，tf.image_summary与tf.summary.scalar， tf.summary.histogram， 　　　　　　　　tf.summary.audio， tf.summary.image。新的摘要ops以名字而不是标签作为它们的第一个参数，意味着摘要ops现在尊重TensorFlow名称范围。
+14、使用tf.summary.FileWriter和tf.summary.FileWriterCache替换tf.train.SummaryWriter和tf.train.SummaryWriterCache。
+15、从公共API中删除RegisterShape。使用C++形状函数注册。
+16、Python API 中的 _ref dtypes 已经弃用。
+17、在C++ API（in tensorflow/cc）中，Input，Output等已经从tensorflow::ops命名空间移动到tensorflow。
+18、将{softmax，sparse_softmax，sigmoid} _cross_entropy_with_logits的arg order更改为（labels，predictions），并强制使用已命名的args。
+　　
+
+ 
+
+Bug 修改及其他变动
+1、新的运算 op：parallel_stack。
+2、为RecordReader/RecordWriter 增加了 tf io 压缩选项常量。
+3、添加了 sparse_column_with_vocabulary_file，指定将字符串特征转换为ID的特征栏（feature column）。
+4、添加了index_to_string_table，返回一个将索引映射到字符串的查找表。
+5、添加string_to_index_table，返回一个将字符串与索引匹配的查找表。
+6、添加ParallelForWithWorkerId函数。
+7、添加string_to_index_table，返回一个将字符串与索引匹配的查找表。
+8、支持从contrib / session_bundle中的v2中的检查点文件恢复会话。
+9、添加了tf.contrib.image.rotate函数，进行任意大小角度旋转。
+10、添加了tf.contrib.framework.filter_variables函数，过滤基于正则表达式的变量列表。
+11、make_template（）可以添加 custom_getter_ param。
+112、添加了关于如何处理recursive_create_dir现有目录的注释。
+13、添加了QR因式分解的操作。
+14、Python API中的分割和mod现在使用flooring（Python）语义。
+15、Android：预构建的libs现在每晚构建。
+16、Android： TensorFlow 推理库 cmake/gradle build 现在归在 contrib/android/cmake下面
+17、Android：更强大的会话初始化（Session initialization）代码。
+18、Android：当调试模式激活时，TF stats现在直接显示在demo和日志中
+19、Android：全新/更好的 README.md 文档
+20、saved_model可用作tf.saved_model。
+21、Empty op 现在是有状态的。
+22、提高CPU上ASSIGN运算的scatter_update的速度。
+23、更改reduce_join，使其处理reduction_indices的方式与其他reduce_ops相同。
+24、将TensorForestEstimator移动到contrib/tensor_forest。
+25、默认情况下启用编译器优化，并允许在configure中进行配置。
+26、使指标权重 broadcasting 更加严格。
+27、添加新的类似队列的StagingArea和新运算 ops：stages 和 unstage。

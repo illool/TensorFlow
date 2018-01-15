@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np 
 import os
+import collections
 #定位符号变量，占位符
 x = tf.placeholder(dtype=tf.float32, shape=None)
 y = tf.placeholder(dtype=tf.float32, shape=None)
@@ -323,7 +324,7 @@ with tf.Session() as sess:
         print(sess.run(one_element))
     
     dataset = tf.data.Dataset.from_tensor_slices(np.random.uniform(size=(5, 2)))
-    dataset = dataset.batch(32).repeat(5)
+    dataset = dataset.repeat(20).shuffle(1000).batch(32)
     iterator = dataset.make_one_shot_iterator()
     one_element = iterator.get_next()
     try:
@@ -344,5 +345,23 @@ with tf.Session() as sess:
             print(sess.run(one_element))
     except tf.errors.OutOfRangeError:
         print("end!")
+        
+    print("双端队列的使用")    
+    d1 = collections.deque()
+    d1.extend('abcdefg')
+    print('extend:', d1)
+    d1.append('h')
+    print('append:', d1)
+    d2 = collections.deque()
+    d2.extendleft(range(6))
+    print('extendleft', d2)
+    d2.appendleft(6)
+    print('appendleft', d2)
+    d2.append(7)
+    print('appendleft', d2)
+    d2.pop()
+    print('appendleft', d2)
+    d2.popleft()
+    print('appendleft', d2)
     #执行会话，输入数据，计算节点，打印结果
     #任务完成，关闭会话

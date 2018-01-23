@@ -1,7 +1,8 @@
 # encoding=utf-8
+
 """
 Generate training and test images.
-    for windows
+
 """
 
 __all__ = (
@@ -31,6 +32,7 @@ FONT_HEIGHT = 32  # Pixel size to which the chars are resized
 
 CHARS=common.CHARS[:]
 CHARS.append(" ")
+CHARS.append("·")
 #为每个字符绘制图片
 def make_char_ims(output_height, font):
     #32*4
@@ -195,7 +197,7 @@ def generate_code_chinese():
         blank = ' '
     
     f = f + random.choice(list(common.LETTERS))
-    f += " "
+    f += "·"
     
     for i in range(length-1):
         f = f + random.choice(common.CHARS)
@@ -366,7 +368,7 @@ def generate_ims(num_images):
 
 if __name__ == "__main__":
     make_char_ims_chinese(FONT_HEIGHT,fonts[0],"苏")
-    im_gen = generate_ims(1000)
+    im_gen = generate_ims(1)
     for img_idx, (im, c, p) in enumerate(im_gen):
         cv2.imshow("苏"+c,im)
-        cv2.waitKey(1)
+        cv2.waitKey(10000)

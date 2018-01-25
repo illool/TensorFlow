@@ -1,7 +1,4 @@
 # -*- coding:utf-8 -*-
-# Filename: test_weather.py
-# Author：hankcs
-# Date: 2016-08-06 PM6:04
 import numpy as np
 
 import hmm

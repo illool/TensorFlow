@@ -1,56 +1,131 @@
 # encoding=utf-8
 """
-Sarsa is a online updating method for Reinforcement learning.
-Unlike Q learning which is a offline updating method, Sarsa is updating while in the current trajectory.
-You will see the sarsa is more coward when punishment is close because it cares about all behaviours,
-while q learning is more brave because it only cares about maximum behaviour.
+Reinforcement learning maze example.
+Red rectangle:          explorer.
+Black rectangles:       hells       [reward = -1].
+Yellow bin circle:      paradise    [reward = +1].
+All other states:       ground      [reward = 0].
+This script is the environment part of this example.
+The RL is in RL_brain.py.
+View more on my tutorial page: https://morvanzhou.github.io/tutorials/
 """
 
-from maze_env import Maze
-from RL_brain import SarsaTable,QLearningTable
+
+import numpy as np
+import time
+import sys
+if sys.version_info.major == 2:
+    import Tkinter as tk
+else:
+    import tkinter as tk
 
 
-def update():
-    for episode in range(100):
-        # initial observation
-        # 初始化环境
-        observation = env.reset()
+UNIT = 40   # pixels
+MAZE_H = 4  # grid height
+MAZE_W = 4  # grid width
 
-        # RL choose action based on observation
-        # Sarsa 根据 state 观测选择行为
-        action = RL.choose_action(str(observation))
 
-        while True:
-            # fresh env
-            # 刷新环境
-            env.render()
-            # RL take action and get next observation and reward
-            # 在环境中采取行为, 获得下一个 state_ (obervation_), reward, 和是否终止
-            observation_, reward, done = env.step(action)
-            # RL choose action based on next observation
-            # 根据下一个 state (obervation_) 选取下一个 action_
-            action_ = RL.choose_action(str(observation_))
-            # RL learn from this transition (s, a, r, s, a) ==> Sarsa
-            # 从 (s, a, r, s, a) 中学习, 更新 Q_tabel 的参数 ==> Sarsa
-            RL.learn(str(observation), action, reward, str(observation_), action_)
-            # swap observation and action
-            # 将下一个当成下一步的 state (observation) and action
-            observation = observation_
-            action = action_
-            #print(RL.q_table)
-            # break while loop when end of this episode
-            # 终止时跳出循环
-            if done:
-                break
-    # end of game
-    # 大循环完毕
-    print('game over')
-    print(RL.q_table)
-    env.destroy()
+class Maze(tk.Tk, object):
+    def __init__(self):
+        super(Maze, self).__init__()
+        self.action_space = ['u', 'd', 'l', 'r']
+        self.n_actions = len(self.action_space)
+        self.title('maze')
+        self.geometry('{0}x{1}'.format(MAZE_H * UNIT, MAZE_H * UNIT))
+        self._build_maze()
 
-if __name__ == "__main__":
-    env = Maze()
-    RL = SarsaTable(actions=list(range(env.n_actions)))
-    #RL = QLearningTable(actions=list(range(env.n_actions)))
-    env.after(100, update)
-    env.mainloop()
+    def _build_maze(self):
+        self.canvas = tk.Canvas(self, bg='white',
+                           height=MAZE_H * UNIT,
+                           width=MAZE_W * UNIT)
+
+        # create grids
+        for c in range(0, MAZE_W * UNIT, UNIT):
+            x0, y0, x1, y1 = c, 0, c, MAZE_H * UNIT
+            self.canvas.create_line(x0, y0, x1, y1)
+        for r in range(0, MAZE_H * UNIT, UNIT):
+            x0, y0, x1, y1 = 0, r, MAZE_H * UNIT, r
+            self.canvas.create_line(x0, y0, x1, y1)
+
+        # create origin
+        origin = np.array([20, 20])
+
+        # hell
+        hell1_center = origin + np.array([UNIT * 2, UNIT])
+        self.hell1 = self.canvas.create_rectangle(
+            hell1_center[0] - 15, hell1_center[1] - 15,
+            hell1_center[0] + 15, hell1_center[1] + 15,
+            fill='black')
+        # hell
+        hell2_center = origin + np.array([UNIT, UNIT * 2])
+        self.hell2 = self.canvas.create_rectangle(
+            hell2_center[0] - 15, hell2_center[1] - 15,
+            hell2_center[0] + 15, hell2_center[1] + 15,
+            fill='black')
+
+        # create oval
+        oval_center = origin + UNIT * 2
+        self.oval = self.canvas.create_oval(
+            oval_center[0] - 15, oval_center[1] - 15,
+            oval_center[0] + 15, oval_center[1] + 15,
+            fill='yellow')
+
+        # create red rect
+        self.rect = self.canvas.create_rectangle(
+            origin[0] - 15, origin[1] - 15,
+            origin[0] + 15, origin[1] + 15,
+            fill='red')
+
+        # pack all
+        self.canvas.pack()
+
+    def reset(self):
+        self.update()
+        time.sleep(0.5)
+        self.canvas.delete(self.rect)
+        origin = np.array([20, 20])
+        self.rect = self.canvas.create_rectangle(
+            origin[0] - 15, origin[1] - 15,
+            origin[0] + 15, origin[1] + 15,
+            fill='red')
+        # return observation
+        return self.canvas.coords(self.rect)
+
+    def step(self, action):
+        s = self.canvas.coords(self.rect)
+        base_action = np.array([0, 0])
+        if action == 0:   # up
+            if s[1] > UNIT:
+                base_action[1] -= UNIT
+        elif action == 1:   # down
+            if s[1] < (MAZE_H - 1) * UNIT:
+                base_action[1] += UNIT
+        elif action == 2:   # right
+            if s[0] < (MAZE_W - 1) * UNIT:
+                base_action[0] += UNIT
+        elif action == 3:   # left
+            if s[0] > UNIT:
+                base_action[0] -= UNIT
+
+        self.canvas.move(self.rect, base_action[0], base_action[1])  # move agent
+
+        s_ = self.canvas.coords(self.rect)  # next state
+
+        # reward function
+        if s_ == self.canvas.coords(self.oval):
+            reward = 1
+            done = True
+            s_ = 'terminal'
+        elif s_ in [self.canvas.coords(self.hell1), self.canvas.coords(self.hell2)]:
+            reward = -1
+            done = True
+            s_ = 'terminal'
+        else:
+            reward = 0
+            done = False
+
+        return s_, reward, done
+
+    def render(self):
+        time.sleep(0.1)
+        self.update()

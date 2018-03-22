@@ -8,8 +8,11 @@ import librosa
   
 from joblib import Parallel, delayed  
   
-wav_path = 'data/wav/train'  
+#wav_path = 'data/wav/train'  
 label_file = 'data/doc/trans/train.word.txt'
+
+wav_path = 'E:\\中文语音数据\\data_thchs30\\data'  
+label_path = 'E:\\中文语音数据\\data_thchs30\\data'
   
 def get_wav_files(wav_path = wav_path):  
     wav_files = []  
@@ -25,7 +28,32 @@ def get_wav_files(wav_path = wav_path):
   
 wav_files = get_wav_files()  
   
-def get_wav_label(wav_files = wav_files, label_file = label_file):  
+def get_wav_label(wav_files = wav_files, label_path = label_path):  
+    labels_dict = {} 
+    for (dirpath, dirnames, filenames) in os.walk(label_path):  
+        for filename in filenames:
+            if filename.endswith(".trn") or filename.endswith(".TRN"):
+                label_id = filename[:-8]
+                filename_path = os.sep.join([dirpath, filename])
+                with open(filename_path, "r", encoding='utf-8') as f:
+                    for label in f:
+                        label = label.strip("\n") 
+                        labels_dict[label_id] = label  
+                        print(label_id,labels_dict[label_id])
+                        break  
+  
+    labels = []  
+    new_wav_files = []  
+    for wav_file in wav_files:  
+        wav_id = os.path.basename(wav_file).split(".")[0]  
+        print(labels_dict[wav_id])
+        if wav_id in labels_dict:  
+            labels.append(labels_dict[wav_id])  
+            new_wav_files.append(wav_file)  
+  
+    return new_wav_files, labels  
+ 
+def get_wav_label_bak(wav_files = wav_files, label_file = label_file):  
     labels_dict = {}  
     with open(label_file, "r", encoding='utf-8') as f:  
         for label in f:  
@@ -41,7 +69,7 @@ def get_wav_label(wav_files = wav_files, label_file = label_file):
             labels.append(labels_dict[wav_id])  
             new_wav_files.append(wav_file)  
   
-    return new_wav_files, labels  
+    return new_wav_files, labels
   
 def get_wav_length(wav):  
     import numpy as np  
@@ -64,13 +92,16 @@ def get_next_batches(batch_size, wav_max_len):
         batches_wavs.append(mfcc.tolist())  
         batches_labels.append(labels_vector[pointer])  
         pointer += 1  
-  
+    #print(pointer)
     # 取零补齐  
     # label append 0 , 0 对应的字符  
     # mfcc 默认的计算长度为20(n_mfcc of mfcc) 作为channel length  
     for mfcc in batches_wavs:  
         while len(mfcc) < wav_max_len:  
-            mfcc.append([0]*20)  
+            mfcc.append([0]*20) 
+        while len(mfcc) > wav_max_len:
+            mfcc.pop()
+        #print(np.array(mfcc).shape)  
     for label in batches_labels:  
         while len(label) < label_max_len:  
             label.append(0)  
@@ -231,12 +262,15 @@ def train_speech_to_text_network(wav_max_len):
   
             global pointer  
             pointer = 0  
+
             for batch in range(n_batch):  
                 batches_wavs, batches_labels = get_next_batches(batch_size, wav_max_len)  
                 train_loss, _ = sess.run([loss, optimizer_op], feed_dict={X: batches_wavs, Y: batches_labels})  
-                print(epoch, batch, train_loss)  
+                print(epoch, batch, train_loss) 
+                #print(epoch, batch,np.array(batches_wavs).shape,np.array(batches_labels).shape)  
+                #print(batches_wavs)
             if epoch % 1 == 0:   #之前是5
-                saver.save(sess, r'D:\\tensorflow\\Speech_Recognition\\speech.module', global_step=epoch)  
+                saver.save(sess, r'F:\\PythonPro\\ARS\\speech.module', global_step=epoch)  
   
 # 训练  
 #train_speech_to_text_network()  

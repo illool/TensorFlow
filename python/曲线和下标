@@ -54,6 +54,11 @@ if __name__ == "__main__":
     ax.plot(y,dataMat2,'go--')
     width = 0.15
     plt.xticks(np.arange(len(keys)) + 1.0*width, keys)
+    axis = plt.gca().xaxis
+    for label in axis.get_ticklabels():
+        label.set_color("k")
+        label.set_rotation(45)
+        label.set_fontsize(10)
     #index = 0
     #for item in keys:
     #    plt.text(item, y[index]+0.05, '%.0f' % y[index], ha='center', va= 'bottom',fontsize=7)

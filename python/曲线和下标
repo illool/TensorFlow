@@ -21,7 +21,7 @@ def loadDataSet():
     key1 = sorted(dict1.keys())
     key2 = sorted(dict2.keys())
     keys = sorted(list(set(key2+key1)))
-    print(len(keys))
+    #print(len(keys))
     
     for key in keys:
         #print(key)
@@ -40,7 +40,11 @@ def call_back(event):
     #info = 'name:{}'.format()
     text.set_text(info)
     fig.canvas.draw_idle() 
- 
+
+def onpick3(event):
+        ind = event.ind
+        print('onpick3 scatter:', ind, np.take(key, ind), np.take(dataMat, ind))
+
 if __name__ == "__main__": 
     dataMat1,dataMat2,keys = loadDataSet()
     x=np.arange(0,len(dataMat1),1)
@@ -52,6 +56,11 @@ if __name__ == "__main__":
     #plt.gcf().canvas.mpl_connect('motion_notify_event', call_back)
     ax.plot(x,dataMat1,'ko--')
     ax.plot(y,dataMat2,'go--')
+    key = keys+keys
+    xy=np.append(x,y)
+    print(len(xy))
+    dataMat = dataMat1+dataMat2
+    print(len(dataMat))
     width = 0.15
     plt.xticks(np.arange(len(keys)) + 1.0*width, keys)
     axis = plt.gca().xaxis
@@ -59,6 +68,8 @@ if __name__ == "__main__":
         label.set_color("k")
         label.set_rotation(45)
         label.set_fontsize(10)
+    col1 = ax.scatter(xy, dataMat,picker=True)    
+    fig.canvas.mpl_connect('pick_event', onpick3)
     #index = 0
     #for item in keys:
     #    plt.text(item, y[index]+0.05, '%.0f' % y[index], ha='center', va= 'bottom',fontsize=7)

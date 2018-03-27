@@ -38,19 +38,23 @@ def call_back(event):
     info = 'name:{}\n button:{}\n x,y:{},{}\n xdata,ydata:{}{}'.format(event.name, event.button,event.x, event.y,event.xdata, event.ydata)
     
     #info = 'name:{}'.format()
+    #text = ax.text(event.xdata, event.ydata, 'event', ha='center', va='center', fontdict={'size': 10})
     text.set_text(info)
     fig.canvas.draw_idle() 
 
 def onpick3(event):
         ind = event.ind
         print('onpick3 scatter:', ind, np.take(key, ind), np.take(dataMat, ind))
+        info = 'time,sale:{}{}'.format(np.take(key, ind), np.take(dataMat, ind))
+        text.set_text(info)
+        fig.canvas.draw_idle()
 
 if __name__ == "__main__": 
     dataMat1,dataMat2,keys = loadDataSet()
     x=np.arange(0,len(dataMat1),1)
     y=np.arange(0,len(dataMat2),1)
     fig, ax = plt.subplots()
-    text = ax.text(0.5, 0.5, 'event', ha='center', va='center', fontdict={'size': 20})
+    text = ax.text(0, 30000, 'event', ha='center', va='center', fontdict={'size': 10})
     
     #fig.canvas.mpl_connect('motion_notify_event', call_back)
     #plt.gcf().canvas.mpl_connect('motion_notify_event', call_back)

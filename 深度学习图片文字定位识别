@@ -1,0 +1,7 @@
+复杂的图片文字识别与定位传统OCR以及opencv做的效果好很难，现在一般使用深度学习来做，网上也有不少开源的：
+1. 图片文字的定位：https://github.com/tianzhi0549/CTPN
+2. 图片文字识别： https://github.com/bgshih/crnn
+3. 综合两者：https://github.com/bear63/sceneReco
+
+下面贴出实际中的使用效果：
+https://blog.csdn.net/haluoluo211/article/details/77776976?locationNum=8&fps=1

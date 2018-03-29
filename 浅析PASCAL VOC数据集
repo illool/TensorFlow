@@ -1,0 +1,211 @@
+PASCAL VOC数据集主要是为图像识别和分割而制作的数据集，我们以VOC2007为例，可以看到VOC2007中一共有五个文件夹:
+
+Annotations  ImageSets  JPEGImages  SegmentationClass  SegmentationObject
+
+    1
+
+SegmentationClass SegmentationObject 是做图像分割的，我们做检测只需要考虑前三个文件夹。
+1.1、 JPEGImages
+
+    JPEGImages 内部存放了PASCAL VOC所提供的所有的图片信息，包括了训练图片和测试图片
+
+    这些图像的像素尺寸大小不一，但是横向图的尺寸大约在500*375左右，纵向图的尺寸大约在375*500左右，基本不会偏差超过100。（在之后的训练中，第一步就是将这些图片都resize到300*300或是500*500，所有原始图片不能离这个标准过远。
+
+1.2、Annotations
+
+Annotations文件夹中存放的是xml格式的标签文件，每一个xml文件都对应于JPEGImages文件夹中的一张图片。xml文件的解析如下：
+
+<annotation>  
+    <folder>VOC2007</folder>                             
+    <filename>2007_000392.jpg</filename>                               //文件名  
+    <source>                                                           //图像来源（不重要）  
+        <database>The VOC2007 Database</database>  
+        <annotation>PASCAL VOC2007</annotation>  
+        <image>flickr</image>  
+    </source>  
+    <size>                                               //图像尺寸（长宽以及通道数）                        
+        <width>500</width>  
+        <height>332</height>  
+        <depth>3</depth>  
+    </size>  
+    <segmented>1</segmented>                                   //是否用于分割（在图像物体识别中01无所谓）  
+    <object>                                                           //检测到的物体  
+        <name>horse</name>                                         //物体类别  
+        <pose>Right</pose>                                         //拍摄角度  
+        <truncated>0</truncated>                                   //是否被截断（0表示完整）  
+        <difficult>0</difficult>                                   //目标是否难以识别（0表示容易识别）  
+        <bndbox>                                                   //bounding-box（包含左下角和右上角xy坐标）  
+            <xmin>100</xmin>  
+            <ymin>96</ymin>  
+            <xmax>355</xmax>  
+            <ymax>324</ymax>  
+        </bndbox>  
+    </object>  
+    <object>                                                           //检测到多个物体  
+        <name>person</name>  
+        <pose>Unspecified</pose>  
+        <truncated>0</truncated>  
+        <difficult>0</difficult>  
+        <bndbox>  
+            <xmin>198</xmin>  
+            <ymin>58</ymin>  
+            <xmax>286</xmax>  
+            <ymax>197</ymax>  
+        </bndbox>  
+    </object>  
+</annotation> 
+
+    1
+    2
+    3
+    4
+    5
+    6
+    7
+    8
+    9
+    10
+    11
+    12
+    13
+    14
+    15
+    16
+    17
+    18
+    19
+    20
+    21
+    22
+    23
+    24
+    25
+    26
+    27
+    28
+    29
+    30
+    31
+    32
+    33
+    34
+    35
+    36
+    37
+    38
+    39
+
+1.3、 ImageSets
+
+ImageSets存放的是每一种类型的challenge对应的图像数据。
+在ImageSets下有四个文件夹：
+
+    Layout Main Segmentation
+
+    Layout下存放的是具有人体部位的数据（人的head、hand、feet等等，这也是VOC challenge的一部分）
+    Main下存放的是图像物体识别的数据，总共分为20类。
+    Segmentation下存放的是可用于分割的数据。
+
+在这里主要考察Main文件夹。
+Main文件夹下包含了20个分类的***_train.txt、***_val.txt和***_trainval.txt。
+这些txt中的内容都差不多如下：
+
+000005 -1
+000007 -1
+000009  1
+000016 -1
+000019 -1
+000020 -1
+000021 -1
+000024 -1
+000030 -1
+000039 -1
+
+    1
+    2
+    3
+    4
+    5
+    6
+    7
+    8
+    9
+    10
+
+前面的表示图像的name，后面的1代表正样本，-1代表负样本。
+_train中存放的是训练使用的数据
+_val中存放的是验证结果使用的数据
+_trainval将上面两个进行了合并
+需要保证的是train和val两者没有交集，也就是训练数据和验证数据不能有重复，在选取训练数据的时候 ，也应该是随机产生的。
+二、根据PASCAL VOC数据集制作自己的数据集
+
+我们制作数据集的时候，其实是把我们自己的数据格式转换为PASCAL VOC数据集的格式。以我以前存储的数据格式为例，我们的数据格式为：
+
+DG00001L003.jpg iris 202 72 337 170
+DG00001L004.jpg iris 227 99 354 197
+DG00001L005.jpg iris 320 47 473 141
+DG00001R002.jpg iris 312 114 488 190
+DG00001R003.jpg iris 252 65 425 148
+DG00002L001.jpg iris 328 184 495 264
+DG00002L003.jpg iris 139 77 291 180
+DG00002L004.jpg iris 116 194 247 294
+DG00002L005.jpg iris 203 138 350 231
+DG00002R001.jpg iris 327 135 456 231
+DG00002R002.jpg iris 225 199 390 281
+DG00002R003.jpg iris 295 42 479 164
+DG00003L001.jpg iris 268 169 427 262
+DG00003L002.jpg iris 277 73 440 165
+DG00003L005.jpg iris 187 168 350 253
+DG00003L005.jpg iris 232 86 412 168
+
+    1
+    2
+    3
+    4
+    5
+    6
+    7
+    8
+    9
+    10
+    11
+    12
+    13
+    14
+    15
+    16
+
+即每行由图片名、目标类型、包围框坐标组成，空格隔开
+如果一张图片有多个目标，则格式如下：（比如两个目标）
+DG00003L005.jpg iris 187 168 350 253
+DG00003L005.jpg iris 232 86 412 168
+四个坐标点为包围框坐标的左上角和右下角。
+当然我们只有一个检测模板iris,如果有多个检测目标，也是类似的格式，比如：
+
+DG00003L001.jpg contact 268 169 427 262
+DG00003L002.jpg iris 277 73 440 16
+
+    1
+    2
+
+三、 利用代码生成数据集XML文件以及训练、测试、验证集
+具体的转换代码和例程可以从下面的github地址下载。
+
+创建数据集代码 https://github.com/ruyiweicas/Creat_FRCNN_DataSet
+
+Github
+
+    VOC2007xml.m 用来生成Annotations目录下的xml文件 VOC2007txt.m
+
+    VOC2007txt.m 根据已生成的xml，制作VOC2007数据集中的trainval.txt;train.txt;test.txt和val.txt。trainval占总数据集的50%，test占总数据集的50%；train占trainval的50%，val占trainval的50%；上面所占百分比可根据自己的数据集修改，如果数据集比较少，test和val可少一些
+
+生成步骤
+
+    1、代码下载后，打开VOC2007xml.m，根据在img中提供好的*.jpg 文件与output.txt就可以生成Annotations的xml 文件，如果要生成自己的xml文件，则只需要将img中的图片替换为自己的图片，output.txt根据格式修改就可以了。
+    2、xml生成后，只需要运行VOC2007txt.m,就可以生成对应的测试集验证集和训练集。
+
+文章代码地址：
+
+https://github.com/ruyiweicas/Creat_FRCNN_DataSet
+
+https://blog.csdn.net/Best_Coder/article/details/76577544?locationNum=8&fps=1

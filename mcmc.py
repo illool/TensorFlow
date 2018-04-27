@@ -5,7 +5,9 @@ from scipy.stats import norm
 import matplotlib.pyplot as plt
 #matplotlib inline
 
+print("from scipy.stats import norm就是个高斯函数的计算包")
 def norm_dist_prob(theta):
+    #输入x，返回高斯 概率密度函数pdf(x, loc=0, scale=1)
     y = norm.pdf(theta, loc=3, scale=2)
     return y
 
@@ -15,6 +17,7 @@ sigma = 1
 t = 0
 while t < T-1:
     t = t + 1
+    #Random variates.rvs(loc=0, scale=1, size=1, random_state=None)
     pi_star = norm.rvs(loc=pi[t - 1], scale=sigma, size=1, random_state=None)
     alpha = min(1, (norm_dist_prob(pi_star[0]) / norm_dist_prob(pi[t - 1])))
 

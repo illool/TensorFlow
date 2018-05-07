@@ -30,7 +30,7 @@ def test_binom_rvs():
     使用.rvs函数模拟一个二项随机变量，其中参数size指定你要进行模拟的次数。我让Python返回10000个参数为n和p的二项式随机变量
     进行10000次实验，每次抛10次硬币，统计有几次正面朝上，最后统计每次实验正面朝上的次数
     '''
-    binom_sim = data = stats.binom.rvs(n=10,p=0.3,size=10000)
+    binom_sim = data = stats.binom.rvs(n=10,p=0.3,size=1000000)
     print(len(binom_sim))
     print("mean: %g" % np.mean(binom_sim))
     print("SD: %g" % np.std(binom_sim,ddof=1))
@@ -38,6 +38,7 @@ def test_binom_rvs():
     plt.hist(binom_sim,bins=10,normed=True)
     plt.xlabel('x')
     plt.ylabel('density')
+    plt.title("simple data")
     plt.show()
 #####################
 #泊松分布
@@ -101,12 +102,18 @@ def test_beta_pmf():
     β分布是一个取值在 [0, 1] 之间的连续分布，它由两个形态参数α和β的取值所刻画。
     β分布的形状取决于α和β的值。贝叶斯分析中大量使用了β分布。
     '''
-    a = 2.0#
-    b = 5.0
-    x = np.arange(0.01,1,0.01)
+    a = 1.0
+    b = 1.0
+    x = np.arange(0.0001,1,0.0001)
     y = stats.beta.pdf(x,a,b)
     print(y)
     plt.plot(x, y)
+    plt.plot(x,stats.beta.pdf(x,0.5,0.5))
+    plt.plot(x,stats.beta.pdf(x,1,2))
+    plt.plot(x,stats.beta.pdf(x,2,2))
+    plt.plot(x,stats.beta.pdf(x,2,5))
+    plt.plot(x,stats.beta.pdf(x,1,3))
+    plt.plot(x,stats.beta.pdf(x,5,1))
     plt.title('Beta: a=%.1f, b=%.1f' % (a,b))
     plt.xlabel('x')
     plt.ylabel('Probability density', fontsize=15)
@@ -144,11 +151,11 @@ def test_expon_rvs():
     plt.show()
 
 if __name__=='__main__':
-    test_expon_rvs()
-    test_exp()
+    #test_expon_rvs()
+    #test_exp()
     test_beta_pmf()
-    test_norm_pmf()
-    test_poisson_rvs()
-    test_poisson_pmf()
-    test_binom_rvs()
-    test_binom_pmf()
+    #test_norm_pmf()
+    #test_poisson_rvs()
+    #test_poisson_pmf()
+    #test_binom_rvs()
+    #test_binom_pmf()

@@ -1,0 +1,6 @@
+doc1	apple orange banana
+doc2	apple orange
+doc3	orange banana
+doc4	cat dog
+doc5	dog tiger
+doc6	tiger cat

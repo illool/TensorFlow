@@ -6,6 +6,8 @@
       难点：
       KKT条件
       SMO算法
+      比较详细的算法流程
+      https://blog.csdn.net/zhongshijunacm/article/details/52006552
 """
 import time
 import random

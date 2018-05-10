@@ -2,6 +2,7 @@
 import numpy as np
 from numpy import *
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.externals import joblib
 from sklearn import ensemble
 import matplotlib.pyplot as plt
 
@@ -25,12 +26,13 @@ X = x.reshape(-1, 1)
 y = siny + np.random.rand(1, len(siny)) * 0.5
 y = np.array(y.tolist()[0])
 clf = DecisionTreeRegressor(max_depth=7)
-rf = ensemble.RandomForestRegressor(n_estimators=2000)  # 这里使用20个决策树
+rf = ensemble.RandomForestRegressor(n_estimators=20)  # 这里使用20个决策树
 clf.fit(X, y)
 rf.fit(X, y)
-
+#joblib.dump(rf, 'rf.model')
 X_test = np.arange(-5.0, 5.0, 0.05)[:, np.newaxis]
 #yp = clf.predict(X_test)
 yp = rf.predict(X_test)
-
+print(rf.feature_importances_)
+print(rf.predict([[0]]))
 plotfigure(x, X_test, y, yp)

@@ -2,6 +2,7 @@
 import numpy as np
 from numpy import *
 from sklearn.tree import DecisionTreeRegressor
+from sklearn import ensemble
 import matplotlib.pyplot as plt
 
 
@@ -21,12 +22,15 @@ x = np.linspace(-5, 5, 200)
 siny = np.sin(x)
 X = x.reshape(-1, 1)
 #X = mat(x).T
-y = siny + np.random.rand(1, len(siny)) * 0.0
+y = siny + np.random.rand(1, len(siny)) * 0.5
 y = np.array(y.tolist()[0])
-clf = DecisionTreeRegressor(max_depth=8)
+clf = DecisionTreeRegressor(max_depth=7)
+rf = ensemble.RandomForestRegressor(n_estimators=2000)  # 这里使用20个决策树
 clf.fit(X, y)
+rf.fit(X, y)
 
 X_test = np.arange(-5.0, 5.0, 0.05)[:, np.newaxis]
-yp = clf.predict(X_test)
+#yp = clf.predict(X_test)
+yp = rf.predict(X_test)
 
 plotfigure(x, X_test, y, yp)

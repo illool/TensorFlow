@@ -1,6 +1,7 @@
 # coding: utf-8
 import math
 import operator
+import plotID3Tree
 
 
 def calcShannonEnt(dataset):
@@ -23,7 +24,7 @@ def calcShannonEnt(dataset):
 
 
 def CreateDataSet():
-    # 不浮出水面是否可以生存     是否有脚蹼     是否属于鱼类
+    # 不浮出水面是否可以生存(no surfacing)     是否有脚蹼(flippers)     是否属于鱼类(类标签)
     dataset = [[1, 1, 'yes'],
                [1, 1, 'yes'],
                [1, 0, 'no'],
@@ -36,6 +37,7 @@ def CreateDataSet():
 def splitDataSet(dataSet, axis, value):
     # 定义按照某个特征进行划分的函数splitDataSet
     # 输入三个变量(待划分的数据集，特征编号，分类值)
+    # 第几个特征(axis)的取值(value)是什么，分为一组
     retDataSet = []
     for featVec in dataSet:
         if featVec[axis] == value:
@@ -77,16 +79,16 @@ def majorityCnt(classList):
     for vote in classList:
         if vote not in classCount.keys():
             classCount[vote] = 0
-        classCount[vote] = 1
-    sortedClassCount = sorted(classCount.iteritems(),
-                              key=operator.itemgetter(1), reverse=True)
+        classCount[vote] += 1
+    sortedClassCount = sorted(classCount.items(),  # Python3.5中：iteritems变为items
+                              key=operator.itemgetter(1), reverse=True)  # operator.itemgetter(1)，获取对象的第一个域的值
     return sortedClassCount[0][0]
 
 
 def createTree(dataSet, labels):
     # 将所有的标签放在classList中去
     classList = [example[-1] for example in dataSet]
-    print(classList.count(classList[0]))
+    # print(classList.count(classList[0]))
     # classList中所有的值都相等，则类别相同，停止划分
     if classList.count(classList[0]) == len(classList):
         return classList[0]
@@ -100,12 +102,41 @@ def createTree(dataSet, labels):
     del(labels[bestFeat])  # 从labels的list中删除该label
     featValues = [example[bestFeat] for example in dataSet]
     uniqueVals = set(featValues)
-    for value in uniqueVals:
+    for value in uniqueVals:  # bestFeat的取值情况有几种(uniqueVals)
         subLabels = labels[:]  # 子集合
         # 构建数据的子集合，并进行递归
         myTree[bestFeatLabel][value] = createTree(
             splitDataSet(dataSet, bestFeat, value), subLabels)
     return myTree
+
+
+def classify(inputTree, featLables, testVec):
+    # 输入三个变量(决策树，属性特征标签，测试的数据)
+    firstStr = list(inputTree.keys())[0]  # 获取树的第一个特征属性
+    secondDict = inputTree[firstStr]  # 树的分支，子集合Dict
+    featIndex = featLables.index(firstStr)  # 获取决策树第一层在featLables中的位置
+    for key in secondDict.keys():
+        if testVec[featIndex] == key:
+            if type(secondDict[key]).__name__ == 'dict':
+                classLabel = classify(secondDict[key], featLables, testVec)
+            else:
+                classLabel = secondDict[key]
+    return classLabel
+
+
+def storeTree(inputTree, filename):
+    # 存储
+    import pickle
+    fw = open(filename, 'wb')  # pickle默认方式是二进制，需要制定'wb'
+    pickle.dump(inputTree, fw)
+    fw.close()
+
+
+def grabTree(filename):
+    # 读取
+    import pickle
+    fr = open(filename, 'rb')  # 需要制定'rb'，以byte形式读取
+    return pickle.load(fr)
 
 
 if __name__ == '__main__':
@@ -122,4 +153,12 @@ if __name__ == '__main__':
     bestDataSet = chooseBestFeatureToSplit(myDat)
     print(bestDataSet)
     myTree = createTree(myDat, labels)
-    # print(myTree)
+    print(myTree)
+
+    classList = [example[-1] for example in myDat]
+    count = majorityCnt(classList)
+
+    predit = classify(myTree, ['no surfacing', 'flippers'], [1, 0])
+    print(predit)
+
+    plotID3Tree.maincreatePlot(myTree)

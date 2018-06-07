@@ -1,0 +1,23 @@
+一般来说，为了控制模型的复杂程度，我们会在loss function中加入正则项：loss = data_item +lamda regularization_item*
+正则项一般可以采用L1 Norm或者是L2 Norm。
+以L2 Norm在为例，在tensorflow中我们可以通过一下代码来计算权重矩阵W所对应的L2 Norm:
+
+regularizer = tf.contrib.layers.l2_regularizer(Regularization_Rate)      # 创建regularizer对象，Regularization_Rate表示正则项在loss function中所占的比重
+loss_W = regularizer(W)      # 计算权重矩阵W所对应的L2 Norm
+
+但是，在神经网络中往往存在着多个权重矩阵W1,W2…Wn，因此最终计算得到的正则项是所有这些权重矩阵所对应的正则项之和，即：
+
+loss = regularizer(W1)+regularizer(W2)+...+regularizer(Wn)
+
+这样一来，不仅存在着计算loss的代码过于冗长的问题，而且当权重矩阵很多的时候容易出现遗漏。因此，我们希望在每次创建权重矩阵能够后立即计算出它所对应的正则项。我们采用以下代码来实现：
+
+W1 = tf.get_variable('weights_1',shape,tf.random_normal_initializer())      # 创建权重矩阵W1
+tf.add_to_collection('losses',regularizer(W1))      # 将权重矩阵W1对应的正则项加入集合losses
+W2 = tf.get_variable('weights_2',shape,tf.random_normal_initializer())      # 创建权重矩阵W2
+tf.add_to_collection('losses',regularizer(W2))      # 将权重矩阵W2对应的正则项加入集合losses
+...
+Wn = tf.get_variable('weights_n',shape,tf.random_normal_initializer())      # 创建权重矩阵Wn
+tf.add_to_collection('losses',regularizer(Wn))      # 将权重矩阵Wn对应的正则项加入集合losses
+
+losses_collection = tf.get_collection('losses')      # 以列表的形式获取集合losses中的值，每一个值都作为列表中的一个元素
+loss = tf.add_n(losses_collection,name='loss')      # 计算列表中所有元素之和，得到的结果就是正则项的值

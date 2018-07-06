@@ -1,0 +1,54 @@
+tf.estimator.EstimatorSpec源码分析
+
+tf.estimator.EstimatorSpec是python新增的一个高级api，它定义了一个具体的模型对象，现根据源代码简要分析其功能。
+ModeKeys类
+
+源代码如下： 
+
+class ModeKeys(object): 
+TRAIN = 'train' 
+EVAL = 'eval' 
+PREDICT = 'infer' 
+该类有点类似于Java中的枚举类型，定义了tensorflow的三种模式：训练、预测、评估模型
+EstimatorSpec类
+
+该类定义了一个具体的模型： 
+
+def __new__(cls, 
+mode, 
+predictions=None, 
+loss=None, 
+train_op=None, 
+eval_metric_ops=None, 
+export_outputs=None, 
+training_chief_hooks=None, 
+training_hooks=None, 
+scaffold=None): 
+
+该类定义了一个具体的模型对象，但是参数之间互相有约束 
+mode: 定义了模型的类型，也就是上文ModeKeys类对象，依赖于不同的model对取值会有所要求： 
+如果mode==ModeKeys.TRAIN，此时模型类型为训练，则必须loss和train_op参数 
+如果mode==ModeKeys.EVAL，此时模型类型为评估，则必须loss参数 
+如果mode==ModeKeys.PREDICT`，此时模型类型为预测，则必须predictions 
+EstimatorSpec一般会配合Estimator类使用。
+Estimator类
+
+这个类被用来训练和评估tensorflow模型 
+这个对象封装了EstimatorSpe类，根据给定的输入和一些其他的参数，去训练或者评估模型。 
+这个类所有的输出都会被写到”model_dir”参数所对应的目录，如果这个参数为null，则会被写入到一个临时文件夹。 
+Estimator类中config参数需传递一个RunConfig对象实例，这个对象用来控制程序的运行环境。他会被传入到Model实例中。见代码: 
+
+if config is None: 
+self._config = run_config.RunConfig() 
+logging.info('Using default config.') 
+else: 
+if not isinstance(config, run_config.RunConfig): 
+raise ValueError( 
+'config must be an instance of RunConfig, but provided %s.' % 
+config) 
+self._config = config 
+numpy_input_fn
+
+
+This returns a function outputtingfeaturesandtargetbased on the dict 
+of numpy arrays. The dictfeatureshas the same keys as thex. 
